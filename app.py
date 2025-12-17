@@ -13,7 +13,7 @@ app.config['SESSION_COOKIE_SECURE'] = False
 
 CLIENT_ID = '186241'
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET', '3b28b9b435663c66d0479030a5e2f0d25f9295ea')
-REDIRECT_URI = os.environ.get('REDIRECT_URI', 'http://localhost:5000/auth/callback')
+REDIRECT_URI = os.environ.get('REDIRECT_URI', 'http://localhost:5001/auth/callback')
 
 @app.route('/')
 def home():
@@ -84,7 +84,7 @@ def kudos_data():
     
     # First, check how many activities they have
     initial_response = requests.get(
-        'https://api.strava.com/v3/athlete/activities',
+        'https://www.strava.com/api/v3/athlete/activities',
         headers=headers,
         params={
             'after': after,
@@ -100,7 +100,7 @@ def kudos_data():
     if len(initial_activities) == 200:
         # Check if there's a second page
         second_page = requests.get(
-            'https://api.strava.com/v3/athlete/activities',
+            'https://www.strava.com/api/v3/athlete/activities',
             headers=headers,
             params={
                 'after': after,
@@ -127,7 +127,7 @@ def kudos_data():
         
         # Get kudos for this activity
         kudos_response = requests.get(
-            f'https://api.strava.com/v3/activities/{activity_id}/kudos',
+            f'https://www.strava.com/api/v3/activities/{activity_id}/kudos',
             headers=headers
         )
         
@@ -169,4 +169,4 @@ def test_network():
     return results
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
