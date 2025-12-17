@@ -147,5 +147,26 @@ def kudos_data():
         'total_kudos': sum(all_kudos.values())
     })
 
+@app.route('/test-network')
+def test_network():
+    import requests
+    results = {}
+    
+    # Test 1: Can we reach httpbin (a test API)?
+    try:
+        r = requests.get('https://httpbin.org/get', timeout=5)
+        results['httpbin'] = f"Success: {r.status_code}"
+    except Exception as e:
+        results['httpbin'] = f"Failed: {str(e)}"
+    
+    # Test 2: Can we reach Strava's API domain?
+    try:
+        r = requests.get('https://api.strava.com', timeout=5)
+        results['strava_api'] = f"Success: {r.status_code}"
+    except Exception as e:
+        results['strava_api'] = f"Failed: {str(e)}"
+    
+    return results
+
 if __name__ == '__main__':
     app.run(debug=True)
