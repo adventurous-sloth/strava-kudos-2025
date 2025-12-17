@@ -4,195 +4,641 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your 2025 Kudos Review</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
-        
+
+        /* Loading Screen Styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .thumbs-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 40px;
+        }
+
+        .thumb {
+            position: absolute;
+            font-size: 2rem;
+            animation: orbit 3s linear infinite;
+            filter: drop-shadow(0 5px 15px rgba(252, 76, 2, 0.4));
+        }
+
+        .thumb:nth-child(1) { animation-delay: 0s; }
+        .thumb:nth-child(2) { animation-delay: -0.75s; }
+        .thumb:nth-child(3) { animation-delay: -1.5s; }
+        .thumb:nth-child(4) { animation-delay: -2.25s; }
+
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg) translateX(80px) rotate(0deg) scale(0.8);
+                opacity: 0.5;
+            }
+            25% {
+                transform: rotate(90deg) translateX(80px) rotate(-90deg) scale(1.2);
+                opacity: 1;
+            }
+            50% {
+                transform: rotate(180deg) translateX(80px) rotate(-180deg) scale(0.8);
+                opacity: 0.5;
+            }
+            75% {
+                transform: rotate(270deg) translateX(80px) rotate(-270deg) scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(360deg) translateX(80px) rotate(-360deg) scale(0.8);
+                opacity: 0.5;
+            }
+        }
+
+        .center-counter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .counter-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .counter-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .loading-text {
+            font-size: 1.3rem;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .progress-container {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 30px auto 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fc4c02, #ffd700);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(252, 76, 2, 0.6);
+        }
+
+        /* Main Content Styles */
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #main-content.visible {
+            opacity: 1;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
-        
+
         h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            color: white;
             text-align: center;
-            color: #333;
             margin-bottom: 10px;
-            font-size: 2.5em;
+            letter-spacing: 2px;
         }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 1.2em;
-        }
-        
-        .stats {
+
+        .athlete-info {
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 40px;
+            gap: 15px;
             margin-bottom: 40px;
-            flex-wrap: wrap;
         }
-        
-        .stat {
+
+        .athlete-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            background: #fc4c02;
+        }
+
+        .athlete-name {
+            font-size: 1.8rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            border-radius: 15px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
-        
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #FC4C02;
+
+        .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: #667eea;
+            line-height: 1;
         }
-        
+
         .stat-label {
+            font-size: 0.9rem;
             color: #666;
             margin-top: 5px;
         }
-        
-        #loading {
-            text-align: center;
-            padding: 60px;
-            font-size: 1.2em;
-            color: #666;
+
+        .podium-section {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #FC4C02;
+
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .podium-place {
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .podium-place.first {
+            animation-delay: 0.2s;
+            order: 2;
+        }
+
+        .podium-place.second {
+            animation-delay: 0s;
+            order: 1;
+        }
+
+        .podium-place.third {
+            animation-delay: 0.4s;
+            order: 3;
+        }
+
+        .podium-avatar {
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 4px solid #ddd;
+            background: linear-gradient(135deg, #667eea, #fc4c02);
+            position: relative;
+        }
+
+        .first .podium-avatar {
+            width: 130px;
+            height: 130px;
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .medal {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .first .medal {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
             width: 50px;
             height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+            font-size: 2rem;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .second .medal {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
         }
-        
-        #chartContainer {
-            display: none;
+
+        .third .medal {
+            background: linear-gradient(135deg, #cd7f32, #daa520);
         }
-        
-        canvas {
-            max-height: 600px;
+
+        .podium-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .first .podium-name {
+            font-size: 1.5rem;
+        }
+
+        .podium-kudos {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            color: #667eea;
+            line-height: 1;
+        }
+
+        .first .podium-kudos {
+            font-size: 3.5rem;
+        }
+
+        .podium-stand {
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 10px 10px 0 0;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .first .podium-stand {
+            height: 150px;
+            font-size: 3rem;
+        }
+
+        .second .podium-stand {
+            height: 120px;
+            font-size: 2.5rem;
+        }
+
+        .third .podium-stand {
+            height: 100px;
+            font-size: 2rem;
+        }
+
+        .rest-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .rest-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .rest-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .rest-rank {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: #ccc;
+            width: 40px;
+        }
+
+        .rest-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #fc4c02);
+            border: 2px solid #ddd;
+        }
+
+        .rest-info {
+            flex: 1;
+        }
+
+        .rest-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 3px;
+        }
+
+        .rest-kudos {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .download-button {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #fc4c02, #ffd700);
+            color: white;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(252, 76, 2, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(252, 76, 2, 0.6);
+        }
+
+        .download-button:active {
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Your 2025 Kudos Review</h1>
-        <p class="subtitle">{{ athlete_name }}</p>
-        
-        <div id="loading">
-            <div class="spinner"></div>
-            <p>Analyzing your 2025 activities...</p>
-        </div>
-        
-        <div id="chartContainer">
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-number" id="totalActivities">-</div>
-                    <div class="stat-label">Activities</div>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-title">Counting Kudos</div>
+            
+            <div class="thumbs-container">
+                <div class="thumb" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">👍</div>
+                <div class="thumb" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">👍</div>
+                <div class="thumb" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">👍</div>
+                <div class="thumb" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">👍</div>
+                <div class="center-counter">
+                    <div class="counter-value" id="kudos-counter">0</div>
+                    <div class="counter-label">kudos found</div>
                 </div>
-                <div class="stat">
-                    <div class="stat-number" id="totalKudos">-</div>
+            </div>
+
+            <div class="loading-text">Analyzing your activities</div>
+            <div class="loading-subtext">This won't take long...</div>
+
+            <div class="progress-container">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <div class="container" id="capture-area">
+            <h1>Your 2025 Kudos Review</h1>
+            
+            <div class="athlete-info">
+                <div class="athlete-avatar" id="athlete-avatar"></div>
+                <div class="athlete-name" id="athlete-name">Loading...</div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-value" id="activities-count">0</div>
+                    <div class="stat-label">Activities in 2025</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-kudos">0</div>
                     <div class="stat-label">Total Kudos</div>
                 </div>
             </div>
-            
-            <canvas id="kudosChart"></canvas>
+
+            <div class="podium-section">
+                <div class="podium" id="podium-top3"></div>
+            </div>
+
+            <div class="rest-grid" id="rest-grid"></div>
         </div>
+
+        <button class="download-button" id="download-btn">
+            📸 Download & Share
+        </button>
     </div>
-    
+
     <script>
         // Fetch kudos data
         fetch('/api/kudos-data')
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw err;
-                    });
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                // Hide loading, show chart
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('chartContainer').style.display = 'block';
-                
-                // Update stats
-                document.getElementById('totalActivities').textContent = data.total_activities;
-                document.getElementById('totalKudos').textContent = data.total_kudos;
-                
-                // Create chart
-                const ctx = document.getElementById('kudosChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Kudos Given',
-                            data: data.data,
-                            backgroundColor: '#FC4C02',
-                            borderColor: '#E34402',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            title: {
-                                display: true,
-                                text: 'Your Top Kudos Champions 🏆',
-                                font: {
-                                    size: 18
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                ticks: {
-                                    precision: 0
-                                }
-                            }
-                        }
+                if (data.error) {
+                    alert(data.message || 'Error loading data. Please try again.');
+                    return;
+                }
+
+                // Animate counter during loading
+                let currentCount = 0;
+                const targetCount = data.total_kudos;
+                const counterElement = document.getElementById('kudos-counter');
+                const progressBar = document.getElementById('progress-bar');
+
+                const counterInterval = setInterval(() => {
+                    const increment = Math.ceil((targetCount - currentCount) / 10);
+                    currentCount += increment;
+                    
+                    if (currentCount >= targetCount) {
+                        currentCount = targetCount;
+                        clearInterval(counterInterval);
+                        
+                        // Show results after counter finishes
+                        setTimeout(() => {
+                            document.getElementById('loading-screen').classList.add('hidden');
+                            document.getElementById('main-content').classList.add('visible');
+                        }, 500);
                     }
+                    
+                    counterElement.textContent = currentCount;
+                    progressBar.style.width = ((currentCount / targetCount) * 100) + '%';
+                }, 100);
+
+                // Populate athlete info
+                document.getElementById('athlete-name').textContent = data.athlete_name;
+                if (data.athlete_profile) {
+                    const avatar = document.getElementById('athlete-avatar');
+                    avatar.style.backgroundImage = `url(${data.athlete_profile})`;
+                    avatar.style.backgroundSize = 'cover';
+                }
+
+                // Populate stats
+                document.getElementById('activities-count').textContent = data.activities_count;
+                document.getElementById('total-kudos').textContent = data.total_kudos;
+
+                // Populate podium (top 3)
+                const podium = document.getElementById('podium-top3');
+                const top3 = data.kudos_data.slice(0, 3);
+                
+                if (top3.length >= 1) {
+                    // Second place
+                    if (top3.length >= 2) {
+                        podium.innerHTML += `
+                            <div class="podium-place second">
+                                <div class="podium-avatar">
+                                    <div class="medal">2</div>
+                                </div>
+                                <div class="podium-name">${top3[1][0]}</div>
+                                <div class="podium-kudos">${top3[1][1]}</div>
+                                <div class="podium-stand">2nd</div>
+                            </div>
+                        `;
+                    }
+
+                    // First place
+                    podium.innerHTML += `
+                        <div class="podium-place first">
+                            <div class="podium-avatar">
+                                <div class="medal">1</div>
+                            </div>
+                            <div class="podium-name">${top3[0][0]}</div>
+                            <div class="podium-kudos">${top3[0][1]}</div>
+                            <div class="podium-stand">1st</div>
+                        </div>
+                    `;
+
+                    // Third place
+                    if (top3.length >= 3) {
+                        podium.innerHTML += `
+                            <div class="podium-place third">
+                                <div class="podium-avatar">
+                                    <div class="medal">3</div>
+                                </div>
+                                <div class="podium-name">${top3[2][0]}</div>
+                                <div class="podium-kudos">${top3[2][1]}</div>
+                                <div class="podium-stand">3rd</div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Populate rest of the list
+                const restGrid = document.getElementById('rest-grid');
+                const rest = data.kudos_data.slice(3);
+                rest.forEach((person, index) => {
+                    restGrid.innerHTML += `
+                        <div class="rest-card">
+                            <div class="rest-rank">${index + 4}</div>
+                            <div class="rest-avatar"></div>
+                            <div class="rest-info">
+                                <div class="rest-name">${person[0]}</div>
+                                <div class="rest-kudos">${person[1]} kudos</div>
+                            </div>
+                        </div>
+                    `;
                 });
             })
             .catch(error => {
-                if (error.error === 'too_many_activities') {
-                    document.getElementById('loading').innerHTML = 
-                        '<p style="color: #FC4C02; font-size: 1.2em; line-height: 1.6;">⚠️ ' + error.message + '</p>';
-                } else {
-                    document.getElementById('loading').innerHTML = 
-                        '<p style="color: #FC4C02;">Error loading data. Please try again.</p>';
-                }
                 console.error('Error:', error);
+                alert('Error loading data. Please try again.');
             });
+
+        // Download image functionality
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const captureArea = document.getElementById('capture-area');
+            
+            // Temporarily hide the button
+            this.style.display = 'none';
+            
+            html2canvas(captureArea, {
+                backgroundColor: null,
+                scale: 2,
+                logging: false
+            }).then(canvas => {
+                // Show button again
+                document.getElementById('download-btn').style.display = 'block';
+                
+                // Download image
+                const link = document.createElement('a');
+                link.download = '2025-strava-kudos-review.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
     </script>
 </body>
 </html>
