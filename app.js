@@ -84,6 +84,7 @@ async function handleCallback() {
             },
             body: JSON.stringify({
                 client_id: CLIENT_ID,
+                client_secret: '3b28b9b435663c66d0479030a5e2f0d25f9295ea',
                 code: code,
                 code_verifier: codeVerifier,
                 grant_type: 'authorization_code'
