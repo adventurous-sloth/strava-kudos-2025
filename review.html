@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your 2025 Kudos Review</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="content-card">
+            <h1>Your 2025 Kudos Review</h1>
+            <p class="subtitle" id="athlete-name">Loading...</p>
+            
+            <div id="loading" class="loading-section">
+                <div class="spinner"></div>
+                <p>Fetching your activities and kudos...</p>
+                <p class="loading-detail">This may take a minute</p>
+            </div>
+            
+            <div id="error" class="error-section" style="display: none;">
+                <p class="error-message"></p>
+            </div>
+            
+            <div id="results" class="results-section" style="display: none;">
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-value" id="total-activities">0</span>
+                        <span class="stat-label">Activities in 2025</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="total-kudos">0</span>
+                        <span class="stat-label">Total Kudos Received</span>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="kudos-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        // Load and display kudos data
+        loadKudosData();
+    </script>
+</body>
+</html>
