@@ -134,11 +134,11 @@ def kudos_data():
         kudoers = kudos_response.json()
         
     for person in kudoers:
-    # Skip if not a valid dict or missing required fields
-    if not isinstance(person, dict) or 'firstname' not in person or 'lastname' not in person:
-        continue
-    name = f"{person['firstname']} {person['lastname']}"
-    all_kudos[name] += 1
+        # Skip if not a valid dict or missing required fields
+        if not isinstance(person, dict) or 'firstname' not in person or 'lastname' not in person:
+            continue
+        name = f"{person['firstname']} {person['lastname']}"
+        all_kudos[name] += 1
     
     # Get top 30 kudos-givers
     top_kudos = all_kudos.most_common(30)
