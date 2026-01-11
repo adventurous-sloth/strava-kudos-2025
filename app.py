@@ -94,7 +94,23 @@ def kudos_data():
         }
     )
     
+    # Check if the request was successful
+    if initial_response.status_code != 200:
+        return jsonify({
+            'error': 'strava_api_error',
+            'message': f'Strava API returned status {initial_response.status_code}',
+            'details': initial_response.text
+        }), 500
+    
     initial_activities = initial_response.json()
+    
+    # Check if it's actually a list
+    if not isinstance(initial_activities, list):
+        return jsonify({
+            'error': 'unexpected_response',
+            'message': 'Strava API did not return a list of activities',
+            'response': initial_activities
+        }), 500
     
     # If they got 200 results, they might have more
     if len(initial_activities) == 200:
@@ -121,24 +137,28 @@ def kudos_data():
     
     # Collect all kudos
     all_kudos = Counter()
-
+    
     for activity in all_activities:
         activity_id = activity['id']
-    
+        
         # Get kudos for this activity
         kudos_response = requests.get(
             f'https://www.strava.com/api/v3/activities/{activity_id}/kudos',
             headers=headers
         )
+        
+        if kudos_response.status_code == 200:
+            kudoers = kudos_response.json()
+            
+            for person in kudoers:
+                # Skip if not a valid dict or missing required fields
+                if not isinstance(person, dict) or 'firstname' not in person or 'lastname' not in person:
+                    continue
+                name = f"{person['firstname']} {person['lastname']}"
+                all_kudos[name] += 1
     
-        kudoers = kudos_response.json()
-    
-        for person in kudoers:  # ✅ Now indented inside the activity loop
-            # Skip if not a valid dict or missing required fields
-            if not isinstance(person, dict) or 'firstname' not in person or 'lastname' not in person:
-                continue
-            name = f"{person['firstname']} {person['lastname']}"
-            all_kudos[name] += 1
+    # Get top 30 kudos-givers
+    top_kudos = all_kudos.most_common(30)
     
     return jsonify({
         'labels': [name for name, _ in top_kudos],
