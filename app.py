@@ -121,27 +121,24 @@ def kudos_data():
     
     # Collect all kudos
     all_kudos = Counter()
-    
+
     for activity in all_activities:
         activity_id = activity['id']
-        
+    
         # Get kudos for this activity
         kudos_response = requests.get(
             f'https://www.strava.com/api/v3/activities/{activity_id}/kudos',
             headers=headers
         )
-        
-        kudoers = kudos_response.json()
-        
-    for person in kudoers:
-        # Skip if not a valid dict or missing required fields
-        if not isinstance(person, dict) or 'firstname' not in person or 'lastname' not in person:
-            continue
-        name = f"{person['firstname']} {person['lastname']}"
-        all_kudos[name] += 1
     
-    # Get top 30 kudos-givers
-    top_kudos = all_kudos.most_common(30)
+        kudoers = kudos_response.json()
+    
+        for person in kudoers:  # ✅ Now indented inside the activity loop
+            # Skip if not a valid dict or missing required fields
+            if not isinstance(person, dict) or 'firstname' not in person or 'lastname' not in person:
+                continue
+            name = f"{person['firstname']} {person['lastname']}"
+            all_kudos[name] += 1
     
     return jsonify({
         'labels': [name for name, _ in top_kudos],
